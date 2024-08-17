@@ -47,10 +47,6 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS perspect (
     [where] INTEGER
 );""")
 
-#global url #ще пару змінних
-#global caption
-#global path
-
 path = None
 user_id = None
 scheduler = AsyncIOScheduler()
@@ -456,7 +452,6 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
 
 async def start_questionnaire_process(message: Message, state: FSMContext):
     try:
-        global path
         file_id = None  # Переменная для хранения file_id
         try:
             if message.photo:
@@ -483,7 +478,8 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
             
             # Загружаем файл на сервер
             await message.bot.download_file(file_info.file_path, destination=path)
-            await state.update_data(photo=file_id)
+            url = telegraph_file_upload(path)
+            await state.update_data(photo=url)
 
             await state.set_state(Form.time)
             await message.answer("Введіть дату та час публікації в форматі 10 08 10 00 (10 серпня 10:00)", reply_markup=ReplyKeyboardRemove())
@@ -520,7 +516,6 @@ async def time_sheldude(message: Message, state: FSMContext):
 @form_router.message(F.content_type == ContentType.TEXT, Form.time) #Хендлер для коректної дати
 async def time_sheldude(message: Message, state: FSMContext):
     try:
-        global path
   
         try:
             timer = message.text
@@ -545,7 +540,8 @@ async def time_sheldude(message: Message, state: FSMContext):
                 await message.answer(f"Публікація буде запланована <b>{user_datetime}</b> ") #Плануємо на потрібний час публікацію
                 await message.answer("<b>Перевірте чи все вірно</b>")
                 if data.get("photo") != None:
-                    url = telegraph_file_upload(path)
+                    #url = telegraph_file_upload(path) Стара строка, потім видалю як перевірю чи пофіксився баг
+                    url = data.get("photo")
                     await message.answer(f"<a href='{url}'> </a>{caption}", parse_mode="HTML", reply_markup=check_data())
                 elif data.get("photo") == None:
                     await message.answer(f"{caption}", parse_mode="HTML", reply_markup=check_data())
@@ -561,20 +557,20 @@ async def time_sheldude(message: Message, state: FSMContext):
 @form_router.callback_query(F.data == 'correct', Form.check_state) #Якщо коррект, то плануємо наше повідомлення
 async def start_questionnaire_process(call: CallbackQuery, bot: Bot, state: FSMContext):
     try:
-        global path
 
         await call.answer('Дані збережено')
         data = await state.get_data()
 
         caption = data.get("text")
         run_date = data.get("time")
+        url = data.get("photo")
 
         user_id = call.from_user.id
 
-        if data.get("photo") != None:
+        """        if data.get("photo") != None:
             url = telegraph_file_upload(path)
         else:
-            url = None
+            url = None"""
 
         await call.message.edit_reply_markup(reply_markup=None)
         

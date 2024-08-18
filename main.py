@@ -47,7 +47,6 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS perspect (
     [where] INTEGER
 );""")
 
-path = None
 user_id = None
 scheduler = AsyncIOScheduler()
 
@@ -116,6 +115,11 @@ def start_message(): #Cтартова клавіатура
     ]
     keyboard_start = InlineKeyboardMarkup(inline_keyboard=kb_start)
     return keyboard_start
+
+def get_path_to_file(file_type: str): #Отримуємо шлях до медіа з конфігу
+    with open('settings.json', 'r') as f:
+        config = json.load(f)
+    return config.get(f'PATH_TO_{file_type.upper()}')
 
 def save_config(config): #Вивантаження з конфігу
     with open("settings.json", 'w') as json_file:
@@ -261,7 +265,7 @@ async def command_change_path_to_photo(call: CallbackQuery, state: FSMContext) -
     try: 
         await call.message.delete()
         await state.set_state(Form.ChangeURLPhoto)
-        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Photo.png</b>\n\n<b>Поточний шлях: {path_to_photo}</b>", reply_markup=ReplyKeyboardRemove())
+        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Photo.png</b>", reply_markup=ReplyKeyboardRemove())
     except Exception as e:
         await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 10.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
@@ -270,7 +274,7 @@ async def command_change_path_to_video(call: CallbackQuery, state: FSMContext) -
     try: 
         await call.message.delete()
         await state.set_state(Form.ChangeURLVideo)
-        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Video.mp4</b>\n\n<b>Поточний шлях: {path_to_video}</b>", reply_markup=ReplyKeyboardRemove())
+        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Video.mp4</b>", reply_markup=ReplyKeyboardRemove())
     except Exception as e:
         await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 11.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")    
 
@@ -279,7 +283,7 @@ async def command_change_path_to_gif(call: CallbackQuery, state: FSMContext) -> 
     try: 
         await call.message.delete()
         await state.set_state(Form.ChangeURLGif)
-        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Animation.gif</b>\n\n<b>Поточний шлях: {path_to_gif}</b>", reply_markup=ReplyKeyboardRemove())
+        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Animation.gif</b>", reply_markup=ReplyKeyboardRemove())
     except Exception as e:
         await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 12.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")    
 
@@ -452,31 +456,32 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
 
 async def start_questionnaire_process(message: Message, state: FSMContext):
     try:
-        file_id = None  # Переменная для хранения file_id
+        file_id = None
         try:
             if message.photo:
                 file_id = message.photo[-1].file_id
-                path = path_to_photo
+                path = get_path_to_file('photo')
             elif message.video:
                 file_id = message.video.file_id
-                path = path_to_video
+                path = get_path_to_file('video')
             elif message.animation: 
                 file_id = message.animation.file_id
-                path = path_to_gif
+                path = get_path_to_file('gif')
             else:
                 await message.answer("Будь ласка, надішліть фото, відео або анімацію.")
                 return
 
-            # Получаем информацию о файле
+            #Отримуємо інфу про файл
             file_info = await message.bot.get_file(file_id)
             file_size = file_info.file_size
 
-            # Проверяем размер файла
+
+            # Перевіряємо його розмір
             if file_size >= 5 * 1024 * 1024:  # 5 МБ в байтах
                 await message.answer("Файл занадто великий. Будь ласка, надішліть файл розміром не більше 5 МБ.")
                 return
             
-            # Загружаем файл на сервер
+            # Завантажуємо на сервак
             await message.bot.download_file(file_info.file_path, destination=path)
             url = telegraph_file_upload(path)
             await state.update_data(photo=url)
@@ -630,7 +635,7 @@ async def main():
                         args=[message_id, bot, url, timestamp, caption, who, location],
                         id=job_id
                     )
-                    print(f"Задача для повідомлення з ID {message_id} додана в планировщик.")
+                    print(f"Задача для повідомлення з ID {message_id} додана в розклад публікацій.")
 
     await process_perspect()
 

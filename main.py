@@ -265,7 +265,8 @@ async def command_change_path_to_photo(call: CallbackQuery, state: FSMContext) -
     try: 
         await call.message.delete()
         await state.set_state(Form.ChangeURLPhoto)
-        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Photo.png</b>", reply_markup=ReplyKeyboardRemove())
+        path = get_path_to_file('photo')
+        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Photo.png</b>\n\n<b>Поточний шлях: </b><code>{path}</code>", reply_markup=ReplyKeyboardRemove())
     except Exception as e:
         await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 10.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
@@ -274,7 +275,8 @@ async def command_change_path_to_video(call: CallbackQuery, state: FSMContext) -
     try: 
         await call.message.delete()
         await state.set_state(Form.ChangeURLVideo)
-        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Video.mp4</b>", reply_markup=ReplyKeyboardRemove())
+        path = get_path_to_file('video')
+        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Video.mp4</b>\n\n<b>Поточний шлях: </b><code>{path}</code>", reply_markup=ReplyKeyboardRemove())
     except Exception as e:
         await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 11.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")    
 
@@ -283,7 +285,8 @@ async def command_change_path_to_gif(call: CallbackQuery, state: FSMContext) -> 
     try: 
         await call.message.delete()
         await state.set_state(Form.ChangeURLGif)
-        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Animation.gif</b>", reply_markup=ReplyKeyboardRemove())
+        path = get_path_to_file('gif')
+        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Animation.gif</b>\n\n<b>Поточний шлях: </b><code>{path}</code>", reply_markup=ReplyKeyboardRemove())
     except Exception as e:
         await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 12.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")    
 
@@ -571,11 +574,6 @@ async def start_questionnaire_process(call: CallbackQuery, bot: Bot, state: FSMC
         url = data.get("photo")
 
         user_id = call.from_user.id
-
-        """        if data.get("photo") != None:
-            url = telegraph_file_upload(path)
-        else:
-            url = None"""
 
         await call.message.edit_reply_markup(reply_markup=None)
         

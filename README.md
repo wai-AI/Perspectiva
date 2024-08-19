@@ -1,10 +1,10 @@
 ﻿# Perspectiva sender bot
 
-## Introduction
+## ✅ Introduction
 
 This bot allows you to schedule the sending of messages, photos, videos, and GIFs to Telegram channels. It also includes an admin panel for managing schedules and users.
 
-## Features
+## 🎯 Features
 **Schedule Messages:** Easily schedule text messages, photos, videos, and GIFs to be sent to your Telegram channels.
 
 **Admin Panel:** Manage scheduled messages and user permissions from an intuitive admin interface.
@@ -13,7 +13,7 @@ This bot allows you to schedule the sending of messages, photos, videos, and GIF
 
 **User Permissions:** Control which users are allowed to schedule messages.
 
-## Installation
+## 🛠 Installation
 
 **First step: Clone the Repository**
 
@@ -62,7 +62,7 @@ Press Win + R, type shell:startup, and hit Enter.
 Copy the .bat script into this folder.
 ```
 
-## Usage
+## 👣 Usage
 
 ### Schedule Messages
 Use the /start command to set up a new message.
@@ -74,8 +74,8 @@ The admin can manage all bot`s settings using the /admin command.
 Features include editing, rescheduling, or canceling existing messages.
 Admin can also manage user permissions, adding or removing users from the ALLOWED_USERS list.
 
-## Contributing
+## 👥 Contributing
 Feel free to submit issues or pull requests. **Contributions are welcome!**
 
-## License
+## 📋 License
 This project is licensed under the MIT License - see the LICENSE file for details.

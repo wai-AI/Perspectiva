@@ -1,3 +1,5 @@
-@echo off
+set VENV_PATH=C:\Users\KNEU\Desktop\Perspectiva\venv
 
-start /MIN pythonw.exe "C:\Users\KNEU\Desktop\new\new\main.py"
+call "%VENV_PATH%\Scripts\activate.bat"
+
+start "" /B "%VENV_PATH%\Scripts\pythonw.exe" "C:\Users\KNEU\Desktop\Perspectiva\main.py"

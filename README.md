@@ -78,4 +78,4 @@ Admin can also manage user permissions, adding or removing users from the ALLOWE
 Feel free to submit issues or pull requests. **Contributions are welcome!**
 
 ## 📋 License
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE]([url](https://github.com/wai-AI/Perspectiva/blob/main/LICENSE)) file for details.

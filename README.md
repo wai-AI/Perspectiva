@@ -68,6 +68,7 @@ Copy the .bat script into this folder.
 Use the /start command to set up a new message.
 Specify the date, time, and content (text, photo, video, GIF) of the message.
 Confirm the details, and the bot will take care of the rest.
+If you want to discard your actions, you can use /cancel command.
 
 ### Admin Panel
 The admin can manage all bot`s settings using the /admin command.

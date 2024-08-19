@@ -91,6 +91,13 @@ def admin_kb(): #Адмінська клавіатура
     keyboard_admin = InlineKeyboardMarkup(inline_keyboard=kb_admin)
     return keyboard_admin
 
+def kb_back():
+    back = [
+        [InlineKeyboardButton(text="◀️ Назад", callback_data='Back')]
+    ]
+    keyboard_back = InlineKeyboardMarkup(inline_keyboard=back)
+    return keyboard_back
+
 def kb_with_path(): #Клава для зміни шляхів
     kb_path = [
         [InlineKeyboardButton(text="📷 Змінити шлях до фото", callback_data='ChangePathToPhoto')],
@@ -249,7 +256,7 @@ async def command_add_user(call: CallbackQuery, state: FSMContext) -> None:
     try:
         await call.message.delete()
         await state.set_state(Form.AddUser)
-        await call.message.answer("Надішліть мені ID користувача, якого хочете додати", reply_markup=ReplyKeyboardRemove())
+        await call.message.answer("Надішліть мені ID користувача, якого хочете додати", reply_markup=kb_back())
     except Exception as e:
         await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 7.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
@@ -258,7 +265,7 @@ async def command_add_user(call: CallbackQuery, state: FSMContext) -> None:
     try:
         await call.message.delete()
         await state.set_state(Form.ChangeID)
-        await call.message.answer(f"Надішліть мені ID групи, в якій Вам потрібно надсилати повідомлення. \n \n <b>Поточний ID: {config['CHANNEL_ID']}</b>", reply_markup=ReplyKeyboardRemove())
+        await call.message.answer(f"Надішліть мені ID групи, в якій Вам потрібно надсилати повідомлення. \n \n <b>Поточний ID: {config['CHANNEL_ID']}</b>", reply_markup=kb_back())
     except Exception as e:
         await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 8.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
@@ -276,7 +283,7 @@ async def command_change_path_to_photo(call: CallbackQuery, state: FSMContext) -
         await call.message.delete()
         await state.set_state(Form.ChangeURLPhoto)
         path = get_path_to_file('photo')
-        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Photo.png</b>\n\n<b>Поточний шлях: </b><code>{path}</code>", reply_markup=ReplyKeyboardRemove())
+        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Photo.png</b>\n\n<b>Поточний шлях: </b><code>{path}</code>", reply_markup=kb_back())
     except Exception as e:
         await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 10.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
@@ -286,7 +293,7 @@ async def command_change_path_to_video(call: CallbackQuery, state: FSMContext) -
         await call.message.delete()
         await state.set_state(Form.ChangeURLVideo)
         path = get_path_to_file('video')
-        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Video.mp4</b>\n\n<b>Поточний шлях: </b><code>{path}</code>", reply_markup=ReplyKeyboardRemove())
+        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Video.mp4</b>\n\n<b>Поточний шлях: </b><code>{path}</code>", reply_markup=kb_back())
     except Exception as e:
         await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 11.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")    
 
@@ -296,7 +303,7 @@ async def command_change_path_to_gif(call: CallbackQuery, state: FSMContext) -> 
         await call.message.delete()
         await state.set_state(Form.ChangeURLGif)
         path = get_path_to_file('gif')
-        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Animation.gif</b>\n\n<b>Поточний шлях: </b><code>{path}</code>", reply_markup=ReplyKeyboardRemove())
+        await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Animation.gif</b>\n\n<b>Поточний шлях: </b><code>{path}</code>", reply_markup=kb_back())
     except Exception as e:
         await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 12.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")    
 
@@ -305,7 +312,7 @@ async def command_change_path(call: CallbackQuery, state: FSMContext) -> None:
     try:
         await call.message.delete()
         await state.set_state(Form.DelUser)
-        await call.message.answer("Надішліть мені ID користувача, якого треба видалити", reply_markup=ReplyKeyboardRemove())
+        await call.message.answer("Надішліть мені ID користувача, якого треба видалити", reply_markup=kb_back())
     except Exception as e:
         await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 13.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
@@ -650,10 +657,10 @@ async def main():
 
 if __name__ == "__main__": #І запускаємо Ійого
     logging.basicConfig(filename="logs.txt",
-                    filemode='a',
+                    filemode='w',
                     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
 
     logging.info("Running Logging")
 

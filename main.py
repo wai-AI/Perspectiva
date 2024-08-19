@@ -121,7 +121,7 @@ def get_path_to_file(file_type: str): #Отримуємо шлях до меді
         config = json.load(f)
     return config.get(f'PATH_TO_{file_type.upper()}')
 
-def save_config(config): #Вивантаження з конфігу
+def save_config(config): #Завантаження в конфіг
     with open("settings.json", 'w') as json_file:
         json.dump(config, json_file, indent=4)
 
@@ -160,6 +160,10 @@ def telegraph_file_upload(path_to_file):  #Завантаження медіа �
     telegraph_url = f'https://telegra.ph{telegraph_url}'
     return telegraph_url
 
+async def load_config():
+    with open('settings.json', 'r') as json_file:
+        return json.load(json_file)
+
 async def on_startup(bot: Bot) -> None:
     cursor.execute("SELECT DISTINCT who FROM perspect")
     users = cursor.fetchall()
@@ -189,8 +193,12 @@ async def change_url(message: Message, state: FSMContext, config_key: str, allow
     except Exception as e:
         await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: {config_key}_ERR.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
 
-async def shledude_sender_for_database(message_id: int, bot: Bot, url: str, timestamp: datetime, caption: str, who: int, location: int):
+async def shledude_sender_for_database(message_id: int, bot: Bot, url: str, timestamp: datetime, caption: str, who: int):
     try:
+        # Загружаем актуальный конфигурационный файл
+        config = await load_config()
+        location = config.get('CHANNEL_ID')
+        
         if url:
             await bot.send_message(chat_id=location, text=f"<a href='{url}'> </a>{caption}")
         else:
@@ -199,10 +207,12 @@ async def shledude_sender_for_database(message_id: int, bot: Bot, url: str, time
         cursor.execute("DELETE FROM perspect WHERE id = ?", (message_id,))
         conn.commit()
     except Exception as e:
+        cursor.execute("DELETE FROM perspect WHERE id = ?", (message_id,))
+        conn.commit()
         await bot.send_message(chat_id=who, text=f"Виникла помилка: <code>{e}</code>. <b>ID: 2.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel)")
 
-def shledude_sender_for_check_database(message_id: int, url: str, timestamp: datetime, caption: str, who: int, location: int, bot: Bot):
-    scheduler.add_job(shledude_sender_for_database, "date", run_date=timestamp, args=(message_id, bot, url, timestamp, caption, who, location))
+def shledude_sender_for_check_database(message_id: int, url: str, timestamp: datetime, caption: str, who: int, bot: Bot):
+    scheduler.add_job(shledude_sender_for_database, "date", run_date=timestamp, args=(message_id, bot, url, timestamp, caption, who))
 
 @form_router.message(lambda message: message.chat.id not in allowed_users) #Відкидування нелегалів
 async def unsuccessful_enter(message: Message):
@@ -524,7 +534,6 @@ async def time_sheldude(message: Message, state: FSMContext):
 @form_router.message(F.content_type == ContentType.TEXT, Form.time) #Хендлер для коректної дати
 async def time_sheldude(message: Message, state: FSMContext):
     try:
-  
         try:
             timer = message.text
             year = datetime.datetime.now().year #Ще купа змінних
@@ -585,7 +594,7 @@ async def start_questionnaire_process(call: CallbackQuery, bot: Bot, state: FSMC
 
         await call.message.answer("Оберіть будь ласка дію, яку бажаєте зробити", reply_markup=start_message())
         
-        shledude_sender_for_check_database(message_id, url, run_date, caption, user_id, group_id, bot)
+        shledude_sender_for_check_database(message_id, url, run_date, caption, user_id, bot)
         await state.clear()
     except Exception as e:
         await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 31.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
@@ -620,7 +629,7 @@ async def main():
             if timestamp < datetime.datetime.now():
                 cursor.execute("DELETE FROM perspect WHERE id = ?", (message_id,))
                 conn.commit()
-                await bot.send_message(int(who), f"Повідомлення з ID {message_id} видалено з бази через прострочку")
+                await bot.send_message(int(who), f"Повідомлення, заплановане на <b>{timestamp_str}</b> видалено з бази через прострочку. Будь ласка, заплануйте повідомлення знову")
 
             else:
                 job_id = f"job_{message_id}"
@@ -630,7 +639,7 @@ async def main():
                         shledude_sender_for_database,
                         "date",
                         run_date=timestamp,
-                        args=[message_id, bot, url, timestamp, caption, who, location],
+                        args=[message_id, bot, url, timestamp, caption, who],
                         id=job_id
                     )
                     print(f"Задача для повідомлення з ID {message_id} додана в розклад публікацій.")
@@ -639,6 +648,15 @@ async def main():
 
     await dp.start_polling(bot)
 
-if __name__ == "__main__": #І запускаємо його
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+if __name__ == "__main__": #І запускаємо Ійого
+    logging.basicConfig(filename="logs.txt",
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
+
+    logging.info("Running Logging")
+
+    logger = logging.getLogger('Logger')
+
     asyncio.run(main())

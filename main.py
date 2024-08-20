@@ -114,6 +114,12 @@ def kb_back():
     keyboard_back = InlineKeyboardMarkup(inline_keyboard=back)
     return keyboard_back
 
+def kb_help():
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📃 Документація", url="https://teletype.in/@w.a.i/PerspectivaSenderBotGuide")]
+    ])
+    return keyboard
+
 def kb_with_path(): #Клава для зміни шляхів
     kb_path = [
         [InlineKeyboardButton(text="📷 Змінити шлях до фото", callback_data='ChangePathToPhoto')],
@@ -267,6 +273,13 @@ async def starting_message(message: Message) -> None:
         await message.answer("Оберіть будь ласка дію, яку бажаєте зробити", reply_markup=start_message())
     except Exception as e:
         await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 3.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
+
+@form_router.message(Command("help")) #Хендлер help
+async def starting_message(message: Message) -> None:
+    try:
+        await message.answer("Натисніть кнопку, щоб відкрити <b>документацію</b>", reply_markup=kb_help())
+    except Exception as e:
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: Help.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
 
 @form_router.message(Command("cancel")) #Хендлер cancel
 async def starting_message(message: Message, state: FSMContext) -> None:

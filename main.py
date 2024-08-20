@@ -10,6 +10,8 @@ import datetime
 import sqlite3
 import os
 
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiogram.methods import SendMessage
 from aiogram.types import FSInputFile, BufferedInputFile
@@ -49,6 +51,7 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS perspect (
 
 user_id = None
 scheduler = AsyncIOScheduler()
+builder = InlineKeyboardBuilder()
 
 with open('settings.json', 'r') as json_file: #Вигрузка з конфігу та визначення змінних
     config = json.load(json_file)
@@ -78,6 +81,19 @@ class Form(StatesGroup): #Клас зі стейтами
 
 kb_photo = [[KeyboardButton(text="Пропустити")]] #Клавіатура для пропуску фото
 photo_keyboard = ReplyKeyboardMarkup(keyboard=kb_photo, resize_keyboard=True, one_time_keyboard=True)
+
+def ShleduleMessages_kb():
+    kb_schledule = InlineKeyboardBuilder()
+    cursor.execute("""SELECT id, time FROM perspect""")
+    publications_time = cursor.fetchall()
+
+    for index in publications_time:
+        id_message = index[0]
+        time_str = index[1]
+        kb_schledule.button(text=f"{time_str}", callback_data=f"time_{id_message}")
+    
+    kb_schledule.button(text=f"◀️ Назад", callback_data="MainMenu")
+    return kb_schledule.adjust(1).as_markup(resize_keyboard=True)
 
 def admin_kb(): #Адмінська клавіатура
     kb_admin = [
@@ -110,7 +126,7 @@ def kb_with_path(): #Клава для зміни шляхів
 
 def check_data(): #Клавіатура для перевірки данних
     kb_list = [
-        [InlineKeyboardButton(text="✅Все вірно", callback_data='correct')],
+        [InlineKeyboardButton(text="✅Все правильно", callback_data='correct')],
         [InlineKeyboardButton(text="❌Заповнити спочатку", callback_data='incorrect')]
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=kb_list)
@@ -118,10 +134,26 @@ def check_data(): #Клавіатура для перевірки данних
 
 def start_message(): #Cтартова клавіатура
     kb_start = [
-        [InlineKeyboardButton(text="✍️Створити пост", callback_data='create_post')]
+        [InlineKeyboardButton(text="✍️ Створити пост", callback_data='create_post')],
+        [InlineKeyboardButton(text="📋 Запланованні повідомлення", callback_data='SchleduleMessages')]
     ]
     keyboard_start = InlineKeyboardMarkup(inline_keyboard=kb_start)
     return keyboard_start
+
+def schledule_keyboard_delete_or_publish_now():
+    kb = [
+        [InlineKeyboardButton(text="🗑 Видалити пост", callback_data='DeletePost')],
+        [InlineKeyboardButton(text="📩 Опублікувати зараз", callback_data='PublishNow')]
+    ]
+    kb_delete_or_publish = InlineKeyboardMarkup(inline_keyboard=kb)
+    return kb_delete_or_publish
+
+def confirmation_keyboard(action: str, selected_id: str) -> InlineKeyboardMarkup:
+    kb = [
+        [InlineKeyboardButton(text="✅ Так", callback_data=f'Confirm_{action}_{selected_id}'), 
+         InlineKeyboardButton(text="❌ Ні", callback_data='Cancel')]
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=kb)
 
 def get_path_to_file(file_type: str): #Отримуємо шлях до медіа з конфігу
     with open('settings.json', 'r') as f:
@@ -202,7 +234,6 @@ async def change_url(message: Message, state: FSMContext, config_key: str, allow
 
 async def shledude_sender_for_database(message_id: int, bot: Bot, url: str, timestamp: datetime, caption: str, who: int):
     try:
-        # Загружаем актуальный конфигурационный файл
         config = await load_config()
         location = config.get('CHANNEL_ID')
         
@@ -219,7 +250,8 @@ async def shledude_sender_for_database(message_id: int, bot: Bot, url: str, time
         await bot.send_message(chat_id=who, text=f"Виникла помилка: <code>{e}</code>. <b>ID: 2.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel)")
 
 def shledude_sender_for_check_database(message_id: int, url: str, timestamp: datetime, caption: str, who: int, bot: Bot):
-    scheduler.add_job(shledude_sender_for_database, "date", run_date=timestamp, args=(message_id, bot, url, timestamp, caption, who))
+    job_id = f"job_{message_id}"
+    scheduler.add_job(shledude_sender_for_database, "date", run_date=timestamp, args=(message_id, bot, url, timestamp, caption, who), id=job_id)
 
 @form_router.message(lambda message: message.chat.id not in allowed_users) #Відкидування нелегалів
 async def unsuccessful_enter(message: Message):
@@ -430,6 +462,106 @@ async def command_start_handler(call: CallbackQuery, state: FSMContext) -> None:
         await call.message.answer("Надішліть мені текст, який хочете розмістити на каналі", reply_markup=ReplyKeyboardRemove())
     except Exception as e:
         await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 23.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+
+@form_router.callback_query(lambda call: call.data == 'SchleduleMessages')
+async def Schledule_Messages(call: CallbackQuery, state: FSMContext) -> None:
+    try:
+        await call.message.delete()
+        await call.message.answer("<b>Заплановані публікації</b>", reply_markup=ShleduleMessages_kb())
+    except Exception as e:
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 000.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
+
+@form_router.callback_query(F.data.startswith('time_'))
+async def check_shledule_message(call: CallbackQuery, state: FSMContext) -> None:
+    try:
+        selected_id = call.data.split('time_')[1]
+        await state.update_data(selected_id=selected_id)
+        print(selected_id)
+        cursor.execute("""SELECT caption, url FROM perspect WHERE id = ?""", (selected_id,))
+        result = cursor.fetchone()
+        if result:
+            caption, url = result
+            await call.message.delete()
+            message_text = f"<a href='{url}'> </a>{caption}"
+            await call.message.answer(message_text, reply_markup=schledule_keyboard_delete_or_publish_now())
+            await call.message.answer(f"<b>Заплановані публікації</b>", reply_markup=ShleduleMessages_kb())
+        else:
+            await call.message.delete()
+            await call.message.answer("Даної публікації не знайдено")
+
+    except Exception as e:
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 500.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")    
+
+@form_router.callback_query(lambda call: call.data == 'DeletePost')
+async def delete_post(call: CallbackQuery, state: FSMContext):
+    await call.message.delete()
+    data = await state.get_data()
+    selected_id = data.get('selected_id')
+    await call.message.answer("Ви впевнені, що хочете видалити заплановану публікацію?", reply_markup=confirmation_keyboard('Delete', selected_id))
+
+@form_router.callback_query(lambda call: call.data == 'PublishNow')
+async def delete_post(call: CallbackQuery, state: FSMContext):
+    await call.message.delete()
+    data = await state.get_data()
+    selected_id = data.get('selected_id')
+    await call.message.answer("Ви впевнені, що хочете відправити заплановану публікацію зараз?", reply_markup=confirmation_keyboard('SendPost', selected_id))
+
+@form_router.callback_query(F.data.startswith('Confirm_'))
+async def delete_post(call: CallbackQuery, state: FSMContext):
+    parts = call.data.split('_')
+
+    _, action, selected_id = parts
+
+    if action == 'Delete':
+        await call.message.delete()
+
+        job_id = f"job_{selected_id}"
+        job = scheduler.get_job(job_id)
+
+        if job:
+            scheduler.remove_job(job_id)
+            print(f"Removed job with ID: {job_id}")
+        else:
+            print(f"Job with ID {job_id} not found")
+        cursor.execute("""DELETE FROM perspect WHERE id = ?""", (selected_id,))
+        conn.commit()
+        await call.message.answer("Публікацію успішно видалено")
+        await call.message.answer(f"<b>Заплановані публікації</b>", reply_markup=ShleduleMessages_kb())
+    elif action == 'SendPost':
+        await call.message.delete()
+
+        job_id = f"job_{selected_id}"
+        job = scheduler.get_job(job_id)
+
+        if job:
+            scheduler.remove_job(job_id)
+            print(f"Removed job with ID: {job_id}")
+        else:
+            print(f"Job with ID {job_id} not found")
+
+        cursor.execute("""SELECT caption, url, [where] FROM perspect WHERE id = ?""", (selected_id,))
+        info = cursor.fetchall()
+        row = info[0]
+
+        caption = row[0]
+        url = row[1]
+        id_chat = row[2]
+
+        message_text = f"<a href='{url}'> </a>{caption}"
+
+        await call.bot.send_message(chat_id=id_chat, text=message_text)
+
+        cursor.execute("""DELETE FROM perspect WHERE id = ?""", (selected_id,))
+        conn.commit()
+
+        await call.message.answer("Публікацію успішно надіслано")
+        await call.message.answer(f"<b>Заплановані публікації</b>", reply_markup=ShleduleMessages_kb())
+
+@form_router.callback_query(F.data == 'Cancel')
+async def cancel_action(call: CallbackQuery) -> None:
+    await call.message.delete()
+    await call.message.answer("Дію скасовано", reply_markup=start_message())
+
 
 @form_router.message(Form.text, F.text) #Зчитування тексту
 async def process_name(message: Message, state: FSMContext) -> None:
@@ -656,14 +788,6 @@ async def main():
     await dp.start_polling(bot)
 
 if __name__ == "__main__": #І запускаємо Ійого
-    logging.basicConfig(filename="logs.txt",
-                    filemode='w',
-                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                    datefmt='%H:%M:%S',
-                    level=logging.INFO)
-
-    logging.info("Running Logging")
-
-    logger = logging.getLogger('Logger')
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout) #Вивід в консоль
 
     asyncio.run(main())

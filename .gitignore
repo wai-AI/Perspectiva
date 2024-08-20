@@ -2,3 +2,5 @@ data.db
 settings.json
 venv/*
 __pycache__
+test.py
+logs.txt

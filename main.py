@@ -143,7 +143,8 @@ def start_message(): #Cтартова клавіатура
 def schledule_keyboard_delete_or_publish_now():
     kb = [
         [InlineKeyboardButton(text="🗑 Видалити пост", callback_data='DeletePost')],
-        [InlineKeyboardButton(text="📩 Опублікувати зараз", callback_data='PublishNow')]
+        [InlineKeyboardButton(text="📩 Опублікувати зараз", callback_data='PublishNow')],
+        [InlineKeyboardButton(text="◀️ Повернутися в головне меню", callback_data='MainMenu')]
     ]
     kb_delete_or_publish = InlineKeyboardMarkup(inline_keyboard=kb)
     return kb_delete_or_publish
@@ -247,7 +248,7 @@ async def shledude_sender_for_database(message_id: int, bot: Bot, url: str, time
     except Exception as e:
         cursor.execute("DELETE FROM perspect WHERE id = ?", (message_id,))
         conn.commit()
-        await bot.send_message(chat_id=who, text=f"Виникла помилка: <code>{e}</code>. <b>ID: 2.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel)")
+        await bot.send_message(chat_id=who, text=f"Виникла помилка: <code>{e}</code>. <b>ID: 1.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel)")
 
 def shledude_sender_for_check_database(message_id: int, url: str, timestamp: datetime, caption: str, who: int, bot: Bot):
     job_id = f"job_{message_id}"
@@ -258,15 +259,14 @@ async def unsuccessful_enter(message: Message):
     try:
         await message.answer("У вас немає доступу до данного боту. Якщо виникла помилка - зверніться будь ласка до @Zakhiel")
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 3.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel", parse_mode="HTML")
-
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 2.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel", parse_mode="HTML")
 
 @form_router.message(CommandStart()) #Хендлер старт
 async def starting_message(message: Message) -> None:
     try:
         await message.answer("Оберіть будь ласка дію, яку бажаєте зробити", reply_markup=start_message())
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 4.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 3.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
 
 @form_router.message(Command("cancel")) #Хендлер cancel
 async def starting_message(message: Message, state: FSMContext) -> None:
@@ -274,14 +274,14 @@ async def starting_message(message: Message, state: FSMContext) -> None:
         await state.clear()
         await message.answer("Дію успішно скасовано", reply_markup=start_message())
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 5.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 4.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.message(lambda message: message.chat.id in admin, Command("admin")) #Адмінський хендлер
 async def unsuccessful_enter(message: Message):
     try:
         await message.answer("<b>Оберіть дію</b>", reply_markup=admin_kb())
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 6.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 5.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.callback_query(lambda call: call.data == 'AddUser') #SET STATE FOR ADD USER
 async def command_add_user(call: CallbackQuery, state: FSMContext) -> None:
@@ -290,7 +290,7 @@ async def command_add_user(call: CallbackQuery, state: FSMContext) -> None:
         await state.set_state(Form.AddUser)
         await call.message.answer("Надішліть мені ID користувача, якого хочете додати", reply_markup=kb_back())
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 7.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 6.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.callback_query(lambda call: call.data == 'ChangeID') #SET STATE FOR CHANGE ID
 async def command_add_user(call: CallbackQuery, state: FSMContext) -> None:
@@ -299,7 +299,7 @@ async def command_add_user(call: CallbackQuery, state: FSMContext) -> None:
         await state.set_state(Form.ChangeID)
         await call.message.answer(f"Надішліть мені ID групи, в якій Вам потрібно надсилати повідомлення. \n \n <b>Поточний ID: {config['CHANNEL_ID']}</b>", reply_markup=kb_back())
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 8.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 7.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.callback_query(lambda call: call.data == 'ChangePath') #SET STATE FOR CHANGE PATH
 async def command_change_path(call: CallbackQuery, state: FSMContext) -> None:
@@ -307,7 +307,7 @@ async def command_change_path(call: CallbackQuery, state: FSMContext) -> None:
         await call.message.delete()
         await call.message.answer("Оберіть який шлях ви бажаєте змінити", reply_markup=kb_with_path())
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 9.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 8.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
 
 @form_router.callback_query(lambda call: call.data == 'ChangePathToPhoto') #SET STATE FOR CHANGE PATH PHOTO
 async def command_change_path_to_photo(call: CallbackQuery, state: FSMContext) -> None:
@@ -317,7 +317,7 @@ async def command_change_path_to_photo(call: CallbackQuery, state: FSMContext) -
         path = get_path_to_file('photo')
         await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Photo.png</b>\n\n<b>Поточний шлях: </b><code>{path}</code>", reply_markup=kb_back())
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 10.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 9.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.callback_query(lambda call: call.data == 'ChangePathToVideo') #SET STATE FOR CHANGE PATH VIDEO
 async def command_change_path_to_video(call: CallbackQuery, state: FSMContext) -> None:
@@ -327,7 +327,7 @@ async def command_change_path_to_video(call: CallbackQuery, state: FSMContext) -
         path = get_path_to_file('video')
         await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Video.mp4</b>\n\n<b>Поточний шлях: </b><code>{path}</code>", reply_markup=kb_back())
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 11.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")    
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 10.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")    
 
 @form_router.callback_query(lambda call: call.data == 'ChangePathToGif') #SET STATE FOR CHANGE PATH GIF
 async def command_change_path_to_gif(call: CallbackQuery, state: FSMContext) -> None:
@@ -337,7 +337,7 @@ async def command_change_path_to_gif(call: CallbackQuery, state: FSMContext) -> 
         path = get_path_to_file('gif')
         await call.message.answer(f"Надішліть мені шлях в форматі: <b>Path/To/Animation.gif</b>\n\n<b>Поточний шлях: </b><code>{path}</code>", reply_markup=kb_back())
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 12.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")    
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 11.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")    
 
 @form_router.callback_query(lambda call: call.data == 'DelUser') #SET STATE FOR DELETE USER
 async def command_change_path(call: CallbackQuery, state: FSMContext) -> None:
@@ -346,7 +346,7 @@ async def command_change_path(call: CallbackQuery, state: FSMContext) -> None:
         await state.set_state(Form.DelUser)
         await call.message.answer("Надішліть мені ID користувача, якого треба видалити", reply_markup=kb_back())
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 13.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 12.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.callback_query(lambda call: call.data == 'MainMenu') #GO TO MAIN MENU
 async def command_change_path(call: CallbackQuery) -> None:
@@ -354,7 +354,7 @@ async def command_change_path(call: CallbackQuery) -> None:
         await call.message.delete()
         await call.message.answer("Ви перейшли в головне меню", reply_markup=start_message())
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 14.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 13.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.callback_query(lambda call: call.data == 'Back') #GO TO BACK ADMIN MENU
 async def command_change_path(call: CallbackQuery) -> None:
@@ -362,7 +362,7 @@ async def command_change_path(call: CallbackQuery) -> None:
         await call.message.delete()
         await call.message.answer("Назад", reply_markup=admin_kb())
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 15.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 14.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.callback_query(lambda call: call.data == 'Restart') #RESTART SYSTEM
 async def command_restart(call: CallbackQuery) -> None:
@@ -371,7 +371,7 @@ async def command_restart(call: CallbackQuery) -> None:
         await call.message.answer("Перезапускаємо сервер")
         os.system("shutdown /r /t 0")
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 16.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 15.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.message(Form.AddUser, F.text) #ADDING USER
 async def command_add_user(message: Message, state: FSMContext) -> None:
@@ -392,7 +392,7 @@ async def command_add_user(message: Message, state: FSMContext) -> None:
                 json.dump(config, json_file, indent=4)
             await state.clear()
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 17.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 16.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
 
 @form_router.message(Form.ChangeID, F.text) #CHANGE GROUP ID
 async def command_change_id(message: Message, state: FSMContext) -> None:
@@ -411,28 +411,28 @@ async def command_change_id(message: Message, state: FSMContext) -> None:
             await message.answer("<b>Оберіть дію</b>", reply_markup=admin_kb())
             await state.clear()
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 18.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")                
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 17.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")                
 
 @form_router.message(Form.ChangeURLPhoto, F.text)  # CHANGE PATH TO PHOTO
 async def command_change_url_photo(message: Message, state: FSMContext) -> None:
     try:
         await change_url(message, state, 'PATH_TO_PHOTO', ['.png', '.jpg', '.jpeg'])
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 19.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")                
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 18.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")                
 
 @form_router.message(Form.ChangeURLVideo, F.text)  # CHANGE PATH TO VIDEO
 async def command_change_url_video(message: Message, state: FSMContext) -> None:
     try:
         await change_url(message, state, 'PATH_TO_VIDEO', ['.mp4'])
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 20.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel") 
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 19.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel") 
 
 @form_router.message(Form.ChangeURLGif, F.text)  # CHANGE PATH TO GIF
 async def command_change_url_gif(message: Message, state: FSMContext) -> None:
     try:
         await change_url(message, state, 'PATH_TO_GIF', ['.gif'])
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 21.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel") 
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 20.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel") 
 
 @form_router.message(Form.DelUser, F.text) #DELETE USER
 async def command_add_user(message: Message, state: FSMContext) -> None:
@@ -452,7 +452,7 @@ async def command_add_user(message: Message, state: FSMContext) -> None:
                 json.dump(config, json_file, indent=4)
             await state.clear()
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 22.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 21.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.callback_query(lambda call: call.data == 'create_post') #CREATE POST
 async def command_start_handler(call: CallbackQuery, state: FSMContext) -> None:
@@ -461,7 +461,7 @@ async def command_start_handler(call: CallbackQuery, state: FSMContext) -> None:
         await state.set_state(Form.text)
         await call.message.answer("Надішліть мені текст, який хочете розмістити на каналі", reply_markup=ReplyKeyboardRemove())
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 23.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 22.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.callback_query(lambda call: call.data == 'SchleduleMessages')
 async def Schledule_Messages(call: CallbackQuery, state: FSMContext) -> None:
@@ -469,7 +469,7 @@ async def Schledule_Messages(call: CallbackQuery, state: FSMContext) -> None:
         await call.message.delete()
         await call.message.answer("<b>Заплановані публікації</b>", reply_markup=ShleduleMessages_kb())
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 000.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 23.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
 
 @form_router.callback_query(F.data.startswith('time_'))
 async def check_shledule_message(call: CallbackQuery, state: FSMContext) -> None:
@@ -484,83 +484,94 @@ async def check_shledule_message(call: CallbackQuery, state: FSMContext) -> None
             await call.message.delete()
             message_text = f"<a href='{url}'> </a>{caption}"
             await call.message.answer(message_text, reply_markup=schledule_keyboard_delete_or_publish_now())
-            await call.message.answer(f"<b>Заплановані публікації</b>", reply_markup=ShleduleMessages_kb())
         else:
             await call.message.delete()
             await call.message.answer("Даної публікації не знайдено")
 
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 500.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")    
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 24.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")    
 
 @form_router.callback_query(lambda call: call.data == 'DeletePost')
 async def delete_post(call: CallbackQuery, state: FSMContext):
-    await call.message.delete()
-    data = await state.get_data()
-    selected_id = data.get('selected_id')
-    await call.message.answer("Ви впевнені, що хочете видалити заплановану публікацію?", reply_markup=confirmation_keyboard('Delete', selected_id))
+    try:
+        await call.message.delete()
+        data = await state.get_data()
+        selected_id = data.get('selected_id')
+        await call.message.answer("Ви впевнені, що хочете видалити заплановану публікацію?", reply_markup=confirmation_keyboard('Delete', selected_id))
+    except Exception as e:
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 25.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
 
 @form_router.callback_query(lambda call: call.data == 'PublishNow')
 async def delete_post(call: CallbackQuery, state: FSMContext):
-    await call.message.delete()
-    data = await state.get_data()
-    selected_id = data.get('selected_id')
-    await call.message.answer("Ви впевнені, що хочете відправити заплановану публікацію зараз?", reply_markup=confirmation_keyboard('SendPost', selected_id))
+    try:
+        await call.message.delete()
+        data = await state.get_data()
+        selected_id = data.get('selected_id')
+        await call.message.answer("Ви впевнені, що хочете відправити заплановану публікацію зараз?", reply_markup=confirmation_keyboard('SendPost', selected_id))
+    except Exception as e:
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 26.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
 
 @form_router.callback_query(F.data.startswith('Confirm_'))
 async def delete_post(call: CallbackQuery, state: FSMContext):
-    parts = call.data.split('_')
+    try:
+        parts = call.data.split('_')
 
-    _, action, selected_id = parts
+        _, action, selected_id = parts
 
-    if action == 'Delete':
-        await call.message.delete()
+        if action == 'Delete':
+            await call.message.delete()
 
-        job_id = f"job_{selected_id}"
-        job = scheduler.get_job(job_id)
+            job_id = f"job_{selected_id}"
+            job = scheduler.get_job(job_id)
 
-        if job:
-            scheduler.remove_job(job_id)
-            print(f"Removed job with ID: {job_id}")
-        else:
-            print(f"Job with ID {job_id} not found")
-        cursor.execute("""DELETE FROM perspect WHERE id = ?""", (selected_id,))
-        conn.commit()
-        await call.message.answer("Публікацію успішно видалено")
-        await call.message.answer(f"<b>Заплановані публікації</b>", reply_markup=ShleduleMessages_kb())
-    elif action == 'SendPost':
-        await call.message.delete()
+            if job:
+                scheduler.remove_job(job_id)
+                print(f"Removed job with ID: {job_id}")
+            else:
+                print(f"Job with ID {job_id} not found")
+            cursor.execute("""DELETE FROM perspect WHERE id = ?""", (selected_id,))
+            conn.commit()
+            await call.message.answer("Публікацію успішно видалено")
+            await call.message.answer(f"<b>Заплановані публікації</b>", reply_markup=ShleduleMessages_kb())
+        elif action == 'SendPost':
+            await call.message.delete()
 
-        job_id = f"job_{selected_id}"
-        job = scheduler.get_job(job_id)
+            job_id = f"job_{selected_id}"
+            job = scheduler.get_job(job_id)
 
-        if job:
-            scheduler.remove_job(job_id)
-            print(f"Removed job with ID: {job_id}")
-        else:
-            print(f"Job with ID {job_id} not found")
+            if job:
+                scheduler.remove_job(job_id)
+                print(f"Removed job with ID: {job_id}")
+            else:
+                print(f"Job with ID {job_id} not found")
 
-        cursor.execute("""SELECT caption, url, [where] FROM perspect WHERE id = ?""", (selected_id,))
-        info = cursor.fetchall()
-        row = info[0]
+            cursor.execute("""SELECT caption, url, [where] FROM perspect WHERE id = ?""", (selected_id,))
+            info = cursor.fetchall()
+            row = info[0]
 
-        caption = row[0]
-        url = row[1]
-        id_chat = row[2]
+            caption = row[0]
+            url = row[1]
+            id_chat = row[2]
 
-        message_text = f"<a href='{url}'> </a>{caption}"
+            message_text = f"<a href='{url}'> </a>{caption}"
 
-        await call.bot.send_message(chat_id=id_chat, text=message_text)
+            await call.bot.send_message(chat_id=id_chat, text=message_text)
 
-        cursor.execute("""DELETE FROM perspect WHERE id = ?""", (selected_id,))
-        conn.commit()
+            cursor.execute("""DELETE FROM perspect WHERE id = ?""", (selected_id,))
+            conn.commit()
 
-        await call.message.answer("Публікацію успішно надіслано")
-        await call.message.answer(f"<b>Заплановані публікації</b>", reply_markup=ShleduleMessages_kb())
+            await call.message.answer("Публікацію успішно надіслано")
+            await call.message.answer(f"<b>Заплановані публікації</b>", reply_markup=ShleduleMessages_kb())
+    except Exception as e:
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 27.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
 
 @form_router.callback_query(F.data == 'Cancel')
 async def cancel_action(call: CallbackQuery) -> None:
-    await call.message.delete()
-    await call.message.answer("Дію скасовано", reply_markup=start_message())
+    try:
+        await call.message.delete()
+        await call.message.answer("Дію скасовано", reply_markup=start_message())
+    except Exception as e:
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 28.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
 
 
 @form_router.message(Form.text, F.text) #Зчитування тексту
@@ -579,14 +590,14 @@ async def process_name(message: Message, state: FSMContext) -> None:
         await message.answer(f"{text}")
         await message.answer("Будь ласка, відправте фото/відео/анімацію, яку бажаєте прикріпити до публікації. Якщо медіафайл не треба - натисність <b>'Пропустити'</b>", reply_markup=photo_keyboard)
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 24.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 29.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.message(Form.text, F.content_type != ContentType.TEXT) #Хендлер для НЕ тексту
 async def error_text(message: Message) -> None:
     try:
         await message.answer("Будь ласка, відправте текст")
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 25.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 30.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.message(F.text.lower() == ('пропустити'), Form.photo) #Хендлер для скіпання фото
 async def start_questionnaire_process(message: Message, state: FSMContext):
@@ -596,7 +607,7 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
         await state.set_state(Form.time)
         await message.answer("Введіть дату та час публікації в форматі 10 08 10 00 (10 серпня 10:00)", reply_markup=ReplyKeyboardRemove())
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 26.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 31.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.message(
         lambda message: message.content_type in [
@@ -644,7 +655,7 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
             await message.answer("Помилка при завантаженні файлу. Спробуйте будь ласка інший")
             return
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 27.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 32.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.message(
     lambda message: message.content_type in [
@@ -660,7 +671,7 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
         await message.answer('Будь ласка, відправте фото,відео або анімацію!')
         await state.set_state(Form.photo)
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 28.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 33.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.message(F.content_type != ContentType.TEXT, Form.time) #Перевіряємо дату на коректність
 async def time_sheldude(message: Message, state: FSMContext):
@@ -668,7 +679,7 @@ async def time_sheldude(message: Message, state: FSMContext):
         await message.answer("Будь ласка, введіть коректну дату в форматі '<b>день місяць година хвилина</b>'.", reply_markup=ReplyKeyboardRemove())
         await state.set_state(Form.time)
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 29.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 34.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")        
 
 @form_router.message(F.content_type == ContentType.TEXT, Form.time) #Хендлер для коректної дати
 async def time_sheldude(message: Message, state: FSMContext):
@@ -708,7 +719,7 @@ async def time_sheldude(message: Message, state: FSMContext):
             await message.answer("Будь ласка, введіть коректну дату в форматі '<b>день місяць година хвилина</b>'.")
             await state.set_state(Form.time)
     except Exception as e:
-        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 30.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
+        await message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 35.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
 
 @form_router.callback_query(F.data == 'correct', Form.check_state) #Якщо коррект, то плануємо наше повідомлення
 async def start_questionnaire_process(call: CallbackQuery, bot: Bot, state: FSMContext):
@@ -736,7 +747,7 @@ async def start_questionnaire_process(call: CallbackQuery, bot: Bot, state: FSMC
         shledude_sender_for_check_database(message_id, url, run_date, caption, user_id, bot)
         await state.clear()
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 31.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 36.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
 
 @form_router.callback_query(F.data == 'incorrect', Form.check_state) #Якщо не коррект - по новій
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
@@ -747,7 +758,7 @@ async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
         await call.message.answer('Надішліть мені текст, який хочете розмістити на каналі')
         await state.set_state(Form.text)
     except Exception as e:
-        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 32.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
+        await call.message.answer(f"Виникла помилка: <code>{e}</code>. <b>ID: 37.</b> Задля її вирішення, будь ласка, зв'яжіться з @Zakhiel")
 
 async def main():
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))

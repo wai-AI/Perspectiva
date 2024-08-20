@@ -64,19 +64,30 @@ Copy the .bat script into this folder.
 
 ## 👣 Usage
 
-### Schedule Messages
-Use the /start command to set up a new message.
-Specify the date, time, and content (text, photo, video, GIF) of the message.
-Confirm the details, and the bot will take care of the rest.
-If you want to discard your actions, you can use /cancel command.
+### Message Scheduling
 
-### Admin Panel
-The admin can manage all bot`s settings using the /admin command.
-Features include editing, rescheduling, or canceling existing messages.
-Admin can also manage user permissions, adding or removing users from the ALLOWED_USERS list.
+Use the ```/start``` command to set up a new message. Specify the date, time, and content of the message (text, photo, video, or GIF). Confirm the details, and the bot will take care of the rest. If you want to cancel your actions, use the ```/cancel``` command.
+
+You can schedule messages with or without media files. To schedule a message, after using the ```/start``` command, press the **"✍️Create Post"** button, then send the text of the message you want to send (but it should not contain special characters /$%^\[]+=`~<>|).
+
+After this, if you want to attach a media file to the message, simply send it to the bot and it will be attached to the post. If you don't need a media file, press the **"Skip"** button.
+
+After this step, you will need to enter the date in the format **"day month hour minute"** (e.g., 10 08 10 00 - which is August 10 at 10:00). The message publication time must be at least 1 minute later than the current time.
+
+Finally, the bot will show you the message as it will be published in your chosen channel. If everything is satisfactory, press the **"✅All Correct"** button, and the publication will be successfully scheduled for your desired time. If something is not right, press **"❌Fill Out Again,"** and the entire process will start over.
+
+At least, you can use ```/help``` command for reading documentation.
+
+### Checking Scheduled Messages
+
+If you want to check scheduled messages, press the **"📜Scheduled Messages"** button to view the list of messages you have scheduled and to be able to manipulate them. If something was scheduled incorrectly or by mistake, you will always be able to delete them before the publication time.
+
+### Administrative Panel
+
+The administrator can manage all bot settings using the ```/admin command.``` Capabilities include adding new users to manage the bot, removing unnecessary users, changing the channel for message publication, configuring all available media storage paths (photos/videos/GIFs), and restarting the server for remote updates.
 
 ## 👥 Contributing
-Feel free to submit issues or pull requests. **Contributions are welcome!**
+A special thanks goes to the people who helped test this bot and find seemingly insignificant but critical bugs. And if you happen to find an error or have an idea on how to improve this bot, **don't hesitate to reach out!**
 
 ## 📋 License
 This project is licensed under the MIT License - see the **[LICENSE](https://github.com/wai-AI/Perspectiva/blob/main/LICENSE)** file for details.
